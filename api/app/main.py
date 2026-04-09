@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.routes import auth, gratitude, streaks, users
 
-app = FastAPI(title="gratitude-api")
+app = FastAPI(title="gratitude-api", version="1.0.0")
 
 _origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
 if _origins:
