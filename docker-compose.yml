@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gratitude
+      POSTGRES_USER: gratitude
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gratitude"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    image: ${ECR_REGISTRY:-gratitude}/gratitude-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    network_mode: host
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - /opt/gratitude/.env
+
+  nginx:
+    image: ${ECR_REGISTRY:-gratitude}/gratitude-nginx:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    network_mode: host
+    depends_on:
+      - api
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+
+volumes:
+  pgdata:
