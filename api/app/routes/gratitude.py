@@ -22,16 +22,6 @@ async def create_gratitude(
 ):
     entry_date = body.entry_date or date.today()
 
-    # Check for duplicate entry on same date
-    existing = await db.execute(
-        select(Gratitude).where(Gratitude.user_id == user.id, Gratitude.entry_date == entry_date)
-    )
-    if existing.scalar_one_or_none():
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="You already have a gratitude entry for this date",
-        )
-
     gratitude = Gratitude(
         user_id=user.id,
         title=body.title,

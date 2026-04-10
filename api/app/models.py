@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Date, DateTime, ForeignKey, Index, String, Text, UniqueConstraint
+from sqlalchemy import Date, DateTime, ForeignKey, Index, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, mapped_column, relationship
 
@@ -25,7 +25,6 @@ class User(Base):
 class Gratitude(Base):
     __tablename__ = "gratitudes"
     __table_args__ = (
-        UniqueConstraint("user_id", "entry_date", name="uq_gratitudes_user_date"),
         Index("ix_gratitudes_user_id", "user_id"),
         Index("ix_gratitudes_entry_date", "entry_date"),
     )
