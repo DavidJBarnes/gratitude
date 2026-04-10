@@ -27,9 +27,12 @@ class _CreateGratitudeScreenState extends State<CreateGratitudeScreen> {
     });
 
     try {
+      final now = DateTime.now();
+      final localDate = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
       await _api.createGratitude(
         _titleController.text.trim(),
         _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
+        entryDate: localDate,
       );
       if (mounted) Navigator.of(context).pop(true);
     } on ApiException catch (e) {
