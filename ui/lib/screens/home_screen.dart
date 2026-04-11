@@ -15,11 +15,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  int _refreshKey = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
+        key: ValueKey(_refreshKey),
         index: _currentIndex,
         children: const [
           _FeedTab(),
@@ -41,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
           final created = await Navigator.of(context).push<bool>(
             MaterialPageRoute(builder: (_) => const CreateGratitudeScreen()),
           );
-          if (created == true) setState(() {});
+          if (created == true) setState(() => _refreshKey++);
         },
         child: const Icon(Icons.add),
       ),
