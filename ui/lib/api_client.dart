@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
+import 'main.dart' show navigatorKey;
 import 'models.dart';
 
 class ApiException implements Exception {
@@ -76,27 +78,51 @@ class ApiClient {
     }
   }
 
+  /// Clear tokens and redirect to login when session is unrecoverable.
+  Future<void> _handleAuthFailure() async {
+    await clearToken();
+    final context = navigatorKey.currentContext;
+    if (context != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Your session has expired. Please sign in again.')),
+      );
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (_) => false);
+    }
+  }
+
   /// Execute a request, automatically refreshing the token on 401.
   Future<http.Response> _authGet(Uri url) async {
     var response = await http.get(url, headers: _headers);
-    if (response.statusCode == 401 && await _tryRefresh()) {
-      response = await http.get(url, headers: _headers);
+    if (response.statusCode == 401) {
+      if (await _tryRefresh()) {
+        response = await http.get(url, headers: _headers);
+      } else {
+        await _handleAuthFailure();
+      }
     }
     return response;
   }
 
   Future<http.Response> _authPost(Uri url, {Object? body}) async {
     var response = await http.post(url, headers: _headers, body: body);
-    if (response.statusCode == 401 && await _tryRefresh()) {
-      response = await http.post(url, headers: _headers, body: body);
+    if (response.statusCode == 401) {
+      if (await _tryRefresh()) {
+        response = await http.post(url, headers: _headers, body: body);
+      } else {
+        await _handleAuthFailure();
+      }
     }
     return response;
   }
 
   Future<http.Response> _authDelete(Uri url) async {
     var response = await http.delete(url, headers: _headers);
-    if (response.statusCode == 401 && await _tryRefresh()) {
-      response = await http.delete(url, headers: _headers);
+    if (response.statusCode == 401) {
+      if (await _tryRefresh()) {
+        response = await http.delete(url, headers: _headers);
+      } else {
+        await _handleAuthFailure();
+      }
     }
     return response;
   }

@@ -4,6 +4,8 @@ import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'theme.dart';
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final api = ApiClient();
@@ -19,6 +21,7 @@ class GratitudeApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Gratitude',
+      navigatorKey: navigatorKey,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
