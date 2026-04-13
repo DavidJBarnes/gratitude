@@ -27,7 +27,17 @@ def verify_password(password: str, password_hash: str) -> bool:
 def create_access_token(user_id: UUID) -> str:
     payload = {
         "sub": str(user_id),
+        "type": "access",
         "exp": datetime.now(timezone.utc) + timedelta(hours=settings.jwt_expiry_hours),
+    }
+    return jwt.encode(payload, settings.jwt_secret, algorithm="HS256")
+
+
+def create_refresh_token(user_id: UUID) -> str:
+    payload = {
+        "sub": str(user_id),
+        "type": "refresh",
+        "exp": datetime.now(timezone.utc) + timedelta(days=settings.jwt_refresh_expiry_days),
     }
     return jwt.encode(payload, settings.jwt_secret, algorithm="HS256")
 
@@ -35,9 +45,21 @@ def create_access_token(user_id: UUID) -> str:
 def decode_access_token(token: str) -> UUID:
     try:
         payload = jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
+        if payload.get("type", "access") != "access":
+            raise jwt.InvalidTokenError("Not an access token")
         return UUID(payload["sub"])
     except (jwt.InvalidTokenError, KeyError, ValueError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+
+def decode_refresh_token(token: str) -> UUID:
+    try:
+        payload = jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
+        if payload.get("type") != "refresh":
+            raise jwt.InvalidTokenError("Not a refresh token")
+        return UUID(payload["sub"])
+    except (jwt.InvalidTokenError, KeyError, ValueError):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
 
 async def get_current_user(
