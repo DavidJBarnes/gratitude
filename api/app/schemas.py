@@ -73,6 +73,18 @@ class GratitudeWithUser(GratitudeResponse):
     user: UserResponse
 
 
+# --- Profile Updates ---
+
+class UpdateEmailRequest(BaseModel):
+    new_email: EmailStr
+    current_password: str
+
+
+class UpdatePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
 # --- Streaks ---
 
 class StreakResponse(BaseModel):

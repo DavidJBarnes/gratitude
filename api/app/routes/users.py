@@ -4,10 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth import get_current_user, gravatar_url
+from app.auth import get_current_user, gravatar_url, hash_password, verify_password
 from app.database import get_db
 from app.models import Gratitude, User
-from app.schemas import GratitudeResponse, UserResponse, UserWithStreak
+from app.schemas import GratitudeResponse, UpdateEmailRequest, UpdatePasswordRequest, UserResponse, UserWithStreak
 from app.streaks import calculate_streaks
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -51,6 +51,44 @@ async def list_users(
             longest_streak=streaks["longest_streak"],
         ))
     return response
+
+
+@router.put("/me/email", response_model=UserResponse)
+async def update_email(
+    body: UpdateEmailRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    if not verify_password(body.current_password, user.password_hash):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect password")
+
+    existing = await db.execute(select(User).where(User.email == body.new_email))
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already in use")
+
+    user.email = body.new_email
+    await db.commit()
+    await db.refresh(user)
+    return UserResponse(
+        id=user.id,
+        email=user.email,
+        display_name=user.display_name,
+        gravatar_url=gravatar_url(user.email),
+        created_at=user.created_at,
+    )
+
+
+@router.put("/me/password", status_code=status.HTTP_204_NO_CONTENT)
+async def update_password(
+    body: UpdatePasswordRequest,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    if not verify_password(body.current_password, user.password_hash):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect password")
+
+    user.password_hash = hash_password(body.new_password)
+    await db.commit()
 
 
 @router.get("/{user_id}/gratitudes", response_model=list[GratitudeResponse])

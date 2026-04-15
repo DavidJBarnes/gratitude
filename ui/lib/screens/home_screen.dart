@@ -5,6 +5,7 @@ import '../widgets/gratitude_card.dart';
 import '../widgets/streak_banner.dart';
 import 'create_gratitude_screen.dart';
 import 'people_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _FeedTab(),
           _MyGratitudesTab(),
           PeopleScreen(),
+          ProfileScreen(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -36,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
           NavigationDestination(icon: Icon(Icons.home), label: 'Feed'),
           NavigationDestination(icon: Icon(Icons.favorite), label: 'Mine'),
           NavigationDestination(icon: Icon(Icons.people), label: 'People'),
+          NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -85,17 +88,6 @@ class _FeedTabState extends State<_FeedTab> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gratitude'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await _api.clearToken();
-              if (context.mounted) {
-                Navigator.of(context).pushReplacementNamed('/login');
-              }
-            },
-          ),
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async => setState(() => _refresh()),

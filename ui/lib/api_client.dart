@@ -115,6 +115,18 @@ class ApiClient {
     return response;
   }
 
+  Future<http.Response> _authPut(Uri url, {Object? body}) async {
+    var response = await http.put(url, headers: _headers, body: body);
+    if (response.statusCode == 401) {
+      if (await _tryRefresh()) {
+        response = await http.put(url, headers: _headers, body: body);
+      } else {
+        await _handleAuthFailure();
+      }
+    }
+    return response;
+  }
+
   Future<http.Response> _authDelete(Uri url) async {
     var response = await http.delete(url, headers: _headers);
     if (response.statusCode == 401) {
@@ -241,6 +253,27 @@ class ApiClient {
     );
     final list = _handleListResponse(response);
     return list.map((e) => GratitudeEntry.fromJson(e)).toList();
+  }
+
+  // --- Profile ---
+
+  Future<User> updateEmail(String newEmail, String currentPassword) async {
+    final response = await _authPut(
+      Uri.parse('$_baseUrl/users/me/email'),
+      body: jsonEncode({'new_email': newEmail, 'current_password': currentPassword}),
+    );
+    final data = await _handleResponse(response);
+    return User.fromJson(data);
+  }
+
+  Future<void> updatePassword(String currentPassword, String newPassword) async {
+    final response = await _authPut(
+      Uri.parse('$_baseUrl/users/me/password'),
+      body: jsonEncode({'current_password': currentPassword, 'new_password': newPassword}),
+    );
+    if (response.statusCode != 204) {
+      await _handleResponse(response);
+    }
   }
 
   // --- Streaks ---
