@@ -76,8 +76,8 @@ jobs:
               "aws ecr get-login-password --region '"$AWS_REGION"' | docker login --username AWS --password-stdin '"$ECR_REGISTRY"'",
               "docker pull '"$IMAGE"'",
               "docker stop '"$CONTAINER_NAME"' || true && docker rm '"$CONTAINER_NAME"' || true",
-              "docker run -d --name '"$CONTAINER_NAME"' --restart unless-stopped --network host -v /etc/letsencrypt:/etc/letsencrypt:ro '"$IMAGE"'",
-              "for i in 1 2 3 4 5; do curl -sf -k https://localhost/ && break || sleep 5; done"
+              "docker run -d --name '"$CONTAINER_NAME"' --restart unless-stopped --network web -p 127.0.0.1:8080:80 '"$IMAGE"'",
+              "for i in 1 2 3 4 5; do curl -sf http://localhost:8080/ && break || sleep 5; done"
             ]' \
             --query 'Command.CommandId' \
             --output text)
