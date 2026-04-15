@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from typing import Optional
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Gratitude
 
 
-async def calculate_streaks(db: AsyncSession, user_id) -> dict:
+async def calculate_streaks(db: AsyncSession, user_id, client_today: Optional[date] = None) -> dict:
     result = await db.execute(
         select(Gratitude.entry_date)
         .where(Gratitude.user_id == user_id)
@@ -32,10 +33,13 @@ async def calculate_streaks(db: AsyncSession, user_id) -> dict:
 
     longest_streak = max(streaks)
 
-    # Current streak: count backwards from today
-    today = date.today()
+    # Use client-supplied date so the streak reflects the user's local calendar,
+    # not the server's timezone.  Fall back to server date only when absent.
+    today = client_today or date.today()
     current_streak = 0
-    check = today
+    # Start from today or the most recent entry date, whichever is later,
+    # so entries posted slightly ahead of the server clock are not skipped.
+    check = max(today, dates[-1])
     date_set = set(dates)
 
     while check in date_set:

@@ -279,8 +279,11 @@ class ApiClient {
   // --- Streaks ---
 
   Future<Streak> getMyStreak() async {
+    final now = DateTime.now();
+    final localDate =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
     final response = await _authGet(
-      Uri.parse('$_baseUrl/streaks/me'),
+      Uri.parse('$_baseUrl/streaks/me?today=$localDate'),
     );
     final data = await _handleResponse(response);
     return Streak.fromJson(data);
