@@ -85,6 +85,17 @@ class UpdatePasswordRequest(BaseModel):
     new_password: str
 
 
+# --- Password Reset ---
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+
 # --- Streaks ---
 
 class StreakResponse(BaseModel):

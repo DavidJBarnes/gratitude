@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'api_client.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/reset_password_screen.dart';
 import 'theme.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -29,6 +30,17 @@ class GratitudeApp extends StatelessWidget {
       routes: {
         '/login': (_) => const LoginScreen(),
         '/home': (_) => const HomeScreen(),
+      },
+      onGenerateRoute: (settings) {
+        final uri = Uri.parse(settings.name ?? '');
+        if (uri.path == '/reset-password') {
+          final token = uri.queryParameters['token'] ?? '';
+          return MaterialPageRoute(
+            builder: (_) => ResetPasswordScreen(token: token),
+            settings: settings,
+          );
+        }
+        return null;
       },
     );
   }

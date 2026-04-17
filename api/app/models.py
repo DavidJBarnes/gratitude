@@ -18,6 +18,8 @@ class User(Base):
     display_name = mapped_column(String(255), nullable=False)
     password_hash = mapped_column(String(255), nullable=False)
     created_at = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    password_reset_token = mapped_column(String(255), nullable=True)
+    password_reset_expires = mapped_column(DateTime(timezone=True), nullable=True)
 
     gratitudes = relationship("Gratitude", back_populates="user", cascade="all, delete-orphan")
 
