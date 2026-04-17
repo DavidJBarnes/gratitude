@@ -22,13 +22,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
-        key: ValueKey(_refreshKey),
         index: _currentIndex,
-        children: const [
-          _FeedTab(),
-          _MyGratitudesTab(),
-          PeopleScreen(),
-          ProfileScreen(),
+        children: [
+          _FeedTab(refreshKey: _refreshKey),
+          _MyGratitudesTab(refreshKey: _refreshKey),
+          const PeopleScreen(),
+          const ProfileScreen(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -55,7 +54,9 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class _FeedTab extends StatefulWidget {
-  const _FeedTab();
+  const _FeedTab({required this.refreshKey});
+
+  final int refreshKey;
 
   @override
   State<_FeedTab> createState() => _FeedTabState();
@@ -80,7 +81,9 @@ class _FeedTabState extends State<_FeedTab> {
   @override
   void didUpdateWidget(covariant _FeedTab oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _refresh();
+    if (widget.refreshKey != oldWidget.refreshKey) {
+      setState(() => _refresh());
+    }
   }
 
   @override
@@ -133,7 +136,9 @@ class _FeedTabState extends State<_FeedTab> {
 }
 
 class _MyGratitudesTab extends StatefulWidget {
-  const _MyGratitudesTab();
+  const _MyGratitudesTab({required this.refreshKey});
+
+  final int refreshKey;
 
   @override
   State<_MyGratitudesTab> createState() => _MyGratitudesTabState();
@@ -156,7 +161,9 @@ class _MyGratitudesTabState extends State<_MyGratitudesTab> {
   @override
   void didUpdateWidget(covariant _MyGratitudesTab oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _refresh();
+    if (widget.refreshKey != oldWidget.refreshKey) {
+      setState(() => _refresh());
+    }
   }
 
   @override

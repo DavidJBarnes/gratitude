@@ -189,6 +189,24 @@ class ApiClient {
     return (token: data['access_token'] as String, user: User.fromJson(data['user']));
   }
 
+  Future<void> forgotPassword(String email) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/auth/forgot-password'),
+      headers: _headers,
+      body: jsonEncode({'email': email}),
+    );
+    await _handleResponse(response);
+  }
+
+  Future<void> resetPassword(String token, String newPassword) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/auth/reset-password'),
+      headers: _headers,
+      body: jsonEncode({'token': token, 'new_password': newPassword}),
+    );
+    await _handleResponse(response);
+  }
+
   // --- Gratitude ---
 
   Future<List<GratitudeEntry>> getMyGratitudes({int limit = 30, int offset = 0}) async {
