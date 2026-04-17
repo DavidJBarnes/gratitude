@@ -3,7 +3,7 @@ import 'package:gratitude_app/main.dart';
 
 void main() {
   testWidgets('App renders login screen', (WidgetTester tester) async {
-    await tester.pumpWidget(const GratitudeApp(isLoggedIn: false));
+    await tester.pumpWidget(const GratitudeApp(initialRoute: '/login'));
     expect(find.text('Gratitude'), findsOneWidget);
   });
 }

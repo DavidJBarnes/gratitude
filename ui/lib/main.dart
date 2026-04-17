@@ -11,12 +11,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final api = ApiClient();
   await api.loadToken();
-  runApp(GratitudeApp(isLoggedIn: api.isLoggedIn));
+  final defaultRoute = WidgetsBinding.instance.platformDispatcher.defaultRouteName;
+  final initialRoute = Uri.parse(defaultRoute).path == '/reset-password'
+      ? defaultRoute
+      : (api.isLoggedIn ? '/home' : '/login');
+  runApp(GratitudeApp(initialRoute: initialRoute));
 }
 
 class GratitudeApp extends StatelessWidget {
-  final bool isLoggedIn;
-  const GratitudeApp({super.key, required this.isLoggedIn});
+  final String initialRoute;
+  const GratitudeApp({super.key, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +30,7 @@ class GratitudeApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
-      initialRoute: isLoggedIn ? '/home' : '/login',
+      initialRoute: initialRoute,
       routes: {
         '/login': (_) => const LoginScreen(),
         '/home': (_) => const HomeScreen(),
@@ -41,6 +45,24 @@ class GratitudeApp extends StatelessWidget {
           );
         }
         return null;
+      },
+      onGenerateInitialRoutes: (name) {
+        final uri = Uri.parse(name);
+        if (uri.path == '/reset-password') {
+          final token = uri.queryParameters['token'] ?? '';
+          return [
+            MaterialPageRoute(
+              builder: (_) => ResetPasswordScreen(token: token),
+              settings: RouteSettings(name: name),
+            ),
+          ];
+        }
+        return [
+          MaterialPageRoute(
+            builder: (_) => name == '/home' ? const HomeScreen() : const LoginScreen(),
+            settings: RouteSettings(name: name),
+          ),
+        ];
       },
     );
   }
